@@ -9,3 +9,6 @@ website: https://leanhe.dev
 commands:
   test_plugin:
     description: "test this plugin"
+  start_drop:
+    description: "Drop specify ingot somewhere"
+    usage: "/<command> [x] [y] [z] [type] [count]"
