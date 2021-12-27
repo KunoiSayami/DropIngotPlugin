@@ -1,11 +1,44 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
 
+
+class StopCommandExecutor implements CommandExecutor {
+
+    private final DropIngotPlugin dropIngotPlugin;
+
+    StopCommandExecutor(DropIngotPlugin plugin) {
+        dropIngotPlugin = plugin;
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!sender.isOp()) {
+            return false;
+        }
+
+        if (args.length == 0) {
+            sender.getServer().getScheduler().cancelTasks(this.dropIngotPlugin);
+            sender.sendMessage("Stopped all jobs");
+            return true;
+        }
+
+        try {
+            sender.getServer().getScheduler().cancelTask(Integer.parseInt(args[0]));
+            sender.sendMessage("Stopped " + args[0]);
+        } catch (NumberFormatException e) {
+            sender.sendMessage("Please check your input");
+        }
+        return true;
+    }
+}
 
 // TODO: Use configure file to store jobs
 class ConfigWrapper {
@@ -35,9 +68,13 @@ public final class DropIngotPlugin extends JavaPlugin {
     @Override
     public void onEnable() {
         getLogger().info("Enabled");
-        PluginCommand command = this.getCommand("test_plugin");
+        PluginCommand command = this.getCommand("airdrop");
         if (command != null) {
             command.setExecutor(new ItemCommandExecutor(this));
+        }
+        command = this.getCommand("stop_task");
+        if (command != null) {
+            command.setExecutor(new StopCommandExecutor(this));
         }
         JobOptions.getJobs();
 

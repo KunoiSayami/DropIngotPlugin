@@ -7,8 +7,9 @@ authors: [ KunoiSayami ]
 description: A simple plugin drop ingot.
 website: https://leanhe.dev
 commands:
-  test_plugin:
-    description: "test this plugin"
-  start_drop:
+  airdrop:
     description: "Drop specify ingot somewhere"
     usage: "/<command> <type> <amount> [interval] [x] [y] [z]"
+  stop_task:
+    description: "Stop airdrop task"
+    usage: "/<command> <id>"

@@ -5,7 +5,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 
 public class ItemCommandExecutor implements CommandExecutor {
@@ -41,14 +40,9 @@ public class ItemCommandExecutor implements CommandExecutor {
             }
 
 
-            JobOptions finalJob = job;
-            BukkitTask task = sender.getServer().getScheduler().runTaskLater(this.dropIngotPlugin, () -> {
-                if (args.length == 6) {
-                    finalJob.spawn(sender.getServer().getWorlds().get(0));
-                } else {
-                    finalJob.spawn(sender.getServer().getWorlds().get(0));
-                }
-            }, job.getInterval());
+            BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
+                job.spawn(sender.getServer().getWorlds().get(0));
+            }, 0, job.getInterval());
 
             sender.sendMessage("Job created, your job id is " + task.getTaskId());
             JobOptions.insertJobs(task.getTaskId());
