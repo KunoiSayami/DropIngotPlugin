@@ -59,8 +59,14 @@ public class JobOptions {
         this.x = x;
         this.y = y;
         this.z = z;
+        if (interval <= 0) {
+            interval = 1;
+        }
         this.interval = interval;
         this.type = type;
+        if (amount < 1) {
+            amount = 1;
+        }
         this.amount = amount;
         this.location = location;
     }
@@ -80,7 +86,7 @@ public class JobOptions {
             case 3:
                 return new JobOptions(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), location);
             case 6:
-                return new JobOptions(args[0], Integer.parseInt(args[4]), Integer.parseInt(args[5]), Double.parseDouble(args[1]), Double.parseDouble(args[2]), Double.parseDouble(args[3]), null);
+                return new JobOptions(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), Double.parseDouble(args[3]), Double.parseDouble(args[4]), Double.parseDouble(args[5]), null);
             default:
                 throw new CommandFormatErrorException();
         }
@@ -143,6 +149,19 @@ public class JobOptions {
             default:
                 return Material.DEAD_BRAIN_CORAL_FAN;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "JobOptions{" +
+                "location=" + location +
+                ", x=" + x +
+                ", y=" + y +
+                ", z=" + z +
+                ", interval=" + interval +
+                ", amount=" + amount +
+                ", type='" + type + '\'' +
+                '}';
     }
 
     ItemStack get_item() {

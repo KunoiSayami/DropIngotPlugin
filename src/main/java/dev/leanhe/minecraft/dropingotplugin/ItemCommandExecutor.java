@@ -42,7 +42,10 @@ public class ItemCommandExecutor implements CommandExecutor {
 
 
             BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
-                job.spawn(sender.getServer().getWorlds().get(0));
+                if (!sender.getServer().getOnlinePlayers().isEmpty()) {
+                    //sender.getServer().getLogger().info(job.toString());
+                    job.spawn(sender.getServer().getWorlds().get(0));
+                }
             }, 0, job.getInterval());
 
             sender.sendMessage("Job created, your job id is " + task.getTaskId());
