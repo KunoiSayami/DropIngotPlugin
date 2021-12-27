@@ -63,7 +63,7 @@ public class JobOptions {
         this.interval = interval;
         this.type = type;
         this.amount = amount;
-        this.location = null;
+        this.location = location;
     }
 
     static JobOptions fromVec(String[] args, CommandSender sender) throws CommandFormatErrorException {
@@ -88,7 +88,11 @@ public class JobOptions {
     }
 
     Location getLocation(World world) {
-        return new Location(world, this.x, this.y, this.z);
+        if (location == null) {
+            return new Location(world, this.x, this.y, this.z);
+        } else {
+            return location;
+        }
     }
 
     @Deprecated

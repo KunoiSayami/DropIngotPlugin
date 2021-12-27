@@ -46,7 +46,7 @@ public class ItemCommandExecutor implements CommandExecutor {
                 if (args.length == 6) {
                     finalJob.spawn(sender.getServer().getWorlds().get(0));
                 } else {
-                    finalJob.spawn(sender.getServer().getWorlds().get(0), sender);
+                    finalJob.spawn(sender.getServer().getWorlds().get(0));
                 }
             }, job.getInterval());
 
