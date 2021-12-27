@@ -5,7 +5,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.block.data.type.CommandBlock;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Item;
@@ -178,5 +177,9 @@ public class JobOptions {
     static void cancelJob(Server server, Integer jobID) {
         server.getScheduler().cancelTask(jobID);
         JobOptions.jobs.remove(jobID);
+    }
+
+    static boolean queryJobs(Integer jobID) {
+        return JobOptions.jobs.contains(jobID);
     }
 }

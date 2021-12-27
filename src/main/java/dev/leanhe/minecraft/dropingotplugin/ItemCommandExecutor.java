@@ -18,7 +18,8 @@ public class ItemCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.isOp()) {
+        if (!(sender.isOp() || sender.hasPermission("dropingot.control"))) {
+            sender.sendMessage("You don't have dropingot.control permission");
             return false;
         }
 

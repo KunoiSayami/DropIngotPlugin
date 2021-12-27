@@ -20,7 +20,8 @@ class StopCommandExecutor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.isOp()) {
+        if (!(sender.isOp() || sender.hasPermission("dropingot.control"))) {
+            sender.sendMessage("You don't have dropingot.control permission");
             return false;
         }
 
@@ -31,10 +32,17 @@ class StopCommandExecutor implements CommandExecutor {
         }
 
         try {
-            sender.getServer().getScheduler().cancelTask(Integer.parseInt(args[0]));
-            sender.sendMessage("Stopped " + args[0]);
+            Integer jobID = Integer.parseInt(args[0]);
+            if (JobOptions.queryJobs(jobID)) {
+                JobOptions.cancelJob(sender.getServer(), jobID);
+                sender.sendMessage("Stopped " + args[0]);
+            } else {
+                sender.sendMessage("JobID uncorrect, please check your input");
+                return false;
+            }
         } catch (NumberFormatException e) {
             sender.sendMessage("Please check your input");
+            return false;
         }
         return true;
     }

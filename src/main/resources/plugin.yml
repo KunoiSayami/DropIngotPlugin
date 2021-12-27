@@ -13,3 +13,10 @@ commands:
   stop_task:
     description: "Stop airdrop task"
     usage: "/<command> <id>"
+permissions:
+  dropingot.*:
+    description: "Allow you use all drop ingot plugin command"
+    children:
+      - dropingot.control
+  dropingot.control:
+    description: "Control airdrop start and stop"
