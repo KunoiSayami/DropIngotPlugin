@@ -11,4 +11,4 @@ commands:
     description: "test this plugin"
   start_drop:
     description: "Drop specify ingot somewhere"
-    usage: "/<command> [x] [y] [z] [type] [count]"
+    usage: "/<command> <type> <amount> [interval] [x] [y] [z]"

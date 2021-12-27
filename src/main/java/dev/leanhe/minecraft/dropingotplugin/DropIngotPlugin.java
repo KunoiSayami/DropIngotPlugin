@@ -39,13 +39,14 @@ public final class DropIngotPlugin extends JavaPlugin {
         if (command != null) {
             command.setExecutor(new ItemCommandExecutor(this));
         }
-
+        JobOptions.getJobs();
 
         //getServer().getPluginManager().registerEvents(this, this);
     }
 
     @Override
     public void onDisable() {
+        JobOptions.clearJobs(getServer(), getPlugin(getClass()));
         getLogger().info("Disabled");
     }
 }
