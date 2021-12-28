@@ -1,5 +1,6 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
+import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -39,11 +40,11 @@ public class ItemCommandExecutor implements CommandExecutor {
             if (job.getMaterial() == Material.DEAD_BRAIN_CORAL_FAN) {
                 sender.sendMessage("Input type is unacceptable, please check your input.");
             }
+            sender.getServer().getLogger().info(job.toString());
 
 
             BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
                 if (!sender.getServer().getOnlinePlayers().isEmpty()) {
-                    //sender.getServer().getLogger().info(job.toString());
                     job.spawn(sender.getServer().getWorlds().get(0));
                 }
             }, 0, job.getInterval());
@@ -53,9 +54,14 @@ public class ItemCommandExecutor implements CommandExecutor {
 
         } catch (CommandFormatErrorException ignored) {
             return false;
+        } catch (ConsoleUsePlaceHolderException e) {
+            sender.sendMessage("Please dont use ~ in console to input location");
+            return false;
         } catch (NumberFormatException e) {
             sender.sendMessage("Parse error, check your input");
             return false;
+        } catch (DropIngotPluginException ignored) {
+
         }
 
 

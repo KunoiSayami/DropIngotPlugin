@@ -9,8 +9,8 @@ website: https://leanhe.dev
 commands:
   airdrop:
     description: "Drop specify ingot somewhere"
-    usage: "/<command> <type> <amount> [interval] [x] [y] [z]"
-  stop_task:
+    usage: "/<command> <type> [amount] [interval] [<x> <y> <z>]"
+  cancelairdrop:
     description: "Stop airdrop task"
     usage: "/<command> <id>"
 permissions:

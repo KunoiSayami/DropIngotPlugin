@@ -1,14 +1,13 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 
+import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Item;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -27,21 +26,6 @@ public class JobOptions {
 
     final int interval, amount;
     String type;
-
-    @Deprecated
-    public JobOptions(String type) {
-        this(type, 1);
-    }
-
-    @Deprecated
-    public JobOptions(String type, int amount) {
-        this(type, amount, 3);
-    }
-
-    @Deprecated
-    public JobOptions(String type, int amount, int interval) {
-        this(type, amount, interval, -1 ,-1 ,-1, null);
-    }
 
     public JobOptions(String type, Location location) {
         this(type, 1, location);
@@ -71,13 +55,31 @@ public class JobOptions {
         this.location = location;
     }
 
-    static JobOptions fromVec(String[] args, CommandSender sender) throws CommandFormatErrorException {
-        Location location = null;
-        if (sender instanceof Player) {
-            location = ((Player) sender).getLocation();
-        } else if (sender instanceof BlockCommandSender) {
-            location = ((BlockCommandSender) sender).getBlock().getLocation();
+    private static double getRealLocation(Location location, int seq) {
+        switch (seq) {
+            case 0:
+                return location.getX();
+            case 1:
+                return location.getY();
+            case 2:
+                return location.getZ();
         }
+        throw new RuntimeException("Unreachable!");
+    }
+
+    private static String replaceLocationPlaceHolder(String str, Location location, int seq) {
+        if (str.startsWith("~")) {
+            String offset = str.split("~", 1)[1];
+            if (offset.isEmpty()) {
+                return String.valueOf(getRealLocation(location, seq));
+            }
+            return String.valueOf(getRealLocation(location, seq) + Double.parseDouble(offset));
+        }
+        return str;
+    }
+
+    static JobOptions fromVec(String[] args, CommandSender sender) throws DropIngotPluginException {
+        Location location = DropIngotPlugin.getSenderLocation(sender);
         switch (args.length) {
             case 1:
                 return new JobOptions(args[0], location);
@@ -86,6 +88,17 @@ public class JobOptions {
             case 3:
                 return new JobOptions(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), location);
             case 6:
+                if (location == null) {
+                    for (int i = 3; i < 6; i++ ) {
+                        if (args[i].startsWith("~")) {
+                            throw new ConsoleUsePlaceHolderException();
+                        }
+                    }
+                } else {
+                    for (int i = 3; i < 6; i++ ) {
+                        args[i] = replaceLocationPlaceHolder(args[i], location, i - 3);
+                    }
+                }
                 return new JobOptions(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), Double.parseDouble(args[3]), Double.parseDouble(args[4]), Double.parseDouble(args[5]), null);
             default:
                 throw new CommandFormatErrorException();
@@ -98,16 +111,6 @@ public class JobOptions {
         } else {
             return location;
         }
-    }
-
-    @Deprecated
-    Item spawn(World world, CommandSender sender) {
-        if (sender instanceof Player) {
-            return this.spawn(world, ((Player) sender).getLocation());
-        } else if (sender instanceof BlockCommandSender) {
-            return this.spawn(world, ((BlockCommandSender) sender).getBlock().getLocation());
-        }
-        throw new RuntimeException("Unreachable!");
     }
 
     Item spawn(World world, Location location) {
