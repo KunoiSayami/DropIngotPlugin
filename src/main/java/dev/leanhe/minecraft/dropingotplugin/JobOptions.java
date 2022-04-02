@@ -7,11 +7,12 @@ import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Item;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class JobOptions {
 
@@ -106,18 +107,18 @@ public class JobOptions {
     }
 
     Location getLocation(World world) {
-        if (location == null) {
-            return new Location(world, this.x, this.y, this.z);
-        } else {
-            return location;
+        return Objects.requireNonNullElseGet(location, () -> new Location(world, this.x, this.y, this.z));
+    }
+
+    void spawn(World world, Location location) {
+        if (this.type.equals("7") || this.type.equals("exp")) {
+            world.spawn(location, ExperienceOrb.class).setExperience(amount);
+            return;
         }
+        world.dropItem(location, new ItemStack(this.getMaterial(), this.amount));
     }
 
-    Item spawn(World world, Location location) {
-        return world.dropItem(location, this.get_item());
-    }
-
-    Item spawn(World world) {
+    void spawn(World world) {
         if (this.x == this.y && this.y == this.z && this.z == -1 && location == null) {
             throw new RuntimeException("Job is initialized without location, use spawn(World, Location) instead");
         }
@@ -125,7 +126,7 @@ public class JobOptions {
         if (location == null) {
             location = this.getLocation(world);
         }
-        return this.spawn(world, location);
+        this.spawn(world, location);
     }
 
     Material getMaterial() {
@@ -154,6 +155,13 @@ public class JobOptions {
         }
     }
 
+    boolean isMaterialVaild() {
+        if ((this.type.equals("7") || this.type.equals("exp"))) {
+            return true;
+        }
+        return this.getMaterial() != Material.DEAD_TUBE_CORAL_FAN;
+    }
+
     @Override
     public String toString() {
         return "JobOptions{" +
@@ -165,10 +173,6 @@ public class JobOptions {
                 ", amount=" + amount +
                 ", type='" + type + '\'' +
                 '}';
-    }
-
-    ItemStack get_item() {
-        return new ItemStack(this.getMaterial(), this.amount);
     }
 
     static ArrayList<Integer> getJobs() {

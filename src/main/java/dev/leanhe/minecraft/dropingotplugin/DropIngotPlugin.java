@@ -73,7 +73,7 @@ public final class DropIngotPlugin extends JavaPlugin {
 
     ConfigWrapper config = new ConfigWrapper(getConfig());
 
-    private static final String[] materials = new String[]{"iron", "gold", "diamond", "netherite", "emerald", "notch"};
+    private static final String[] materials = new String[]{"iron", "gold", "diamond", "netherite", "emerald", "notch", "exp"};
 
 
     public static Location getSenderLocation(CommandSender sender) {

@@ -1,7 +1,6 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -37,14 +36,16 @@ public class ItemCommandExecutor implements CommandExecutor {
         try {
             JobOptions job = JobOptions.fromVec(args, sender);
 
-            if (job.getMaterial() == Material.DEAD_BRAIN_CORAL_FAN) {
+            if (!job.isMaterialVaild()) {
                 sender.sendMessage("Input type is unacceptable, please check your input.");
             }
             sender.getServer().getLogger().info(job.toString());
 
 
             BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
+                // TODO: Try to calculate the relative position of the player
                 if (!sender.getServer().getOnlinePlayers().isEmpty()) {
+                    // TODO: Should support multiple world
                     job.spawn(sender.getServer().getWorlds().get(0));
                 }
             }, 0, job.getInterval());

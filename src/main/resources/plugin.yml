@@ -1,7 +1,7 @@
 name: DropIngotPlugin
 version: '${project.version}'
 main: dev.leanhe.minecraft.dropingotplugin.DropIngotPlugin
-api-version: 1.17
+api-version: 1.16
 prefix: DropIngotPlugin
 authors: [ KunoiSayami ]
 description: A simple plugin drop ingot.
