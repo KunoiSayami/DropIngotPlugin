@@ -1,11 +1,14 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.scheduler.BukkitTask;
+
+import java.util.Objects;
 
 public class ItemCommandExecutor implements CommandExecutor {
 
@@ -15,6 +18,9 @@ public class ItemCommandExecutor implements CommandExecutor {
         this.dropIngotPlugin = dropIngotPlugin;
     }
 
+    public static double calcDistance(Location a, Location b) {
+        return Math.sqrt(Math.pow(a.getX() - b.getX(), 2) + Math.pow(a.getY() - b.getY(), 2) + Math.pow(a.getZ() - b.getZ(), 2));
+    }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -41,12 +47,22 @@ public class ItemCommandExecutor implements CommandExecutor {
             }
             sender.getServer().getLogger().info(job.toString());
 
-
             BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
-                // TODO: Try to calculate the relative position of the player
-                if (!sender.getServer().getOnlinePlayers().isEmpty()) {
-                    // TODO: Should support multiple world
-                    job.spawn(sender.getServer().getWorlds().get(0));
+                if (sender.getServer().getOnlinePlayers().stream().anyMatch(player -> {
+
+                    Location loc = player.getLocation();
+                    if (!Objects.equals(loc.getWorld(), job.getWorld())) {
+                        return false;
+                    }
+
+                    double distance = ItemCommandExecutor.calcDistance(loc, job.getLocation());
+
+                    //Bukkit.getLogger().info("Distance => " + distance);
+
+                    return distance <= 64;
+                }))
+                {
+                    job.spawn();
                 }
             }, 0, job.getInterval());
 

@@ -1,6 +1,7 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -84,6 +85,16 @@ public final class DropIngotPlugin extends JavaPlugin {
             location = ((BlockCommandSender) sender).getBlock().getLocation();
         }
         return location;
+    }
+
+    public static World getSenderWorld(CommandSender sender) {
+        if (sender instanceof Player) {
+            return ((Player) sender).getWorld();
+        } else if (sender instanceof BlockCommandSender) {
+            return ((BlockCommandSender) sender).getBlock().getWorld();
+        } else {
+            return sender.getServer().getWorlds().get(0);
+        }
     }
 
     private static ArrayList<String> getLevel3Complete(CommandSender sender) {
