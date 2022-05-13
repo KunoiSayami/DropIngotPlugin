@@ -44,6 +44,7 @@ public class ItemCommandExecutor implements CommandExecutor {
 
             if (!job.isMaterialVaild()) {
                 sender.sendMessage("Input type is unacceptable, please check your input.");
+                return false;
             }
             sender.getServer().getLogger().info(job.toString());
 

@@ -5,7 +5,7 @@ api-version: 1.16
 prefix: DropIngotPlugin
 authors: [ KunoiSayami ]
 description: A simple plugin drop ingot.
-website: https://leanhe.dev
+website: https://github.com/KunoiSayami
 commands:
   airdrop:
     description: "Drop specify ingot somewhere"

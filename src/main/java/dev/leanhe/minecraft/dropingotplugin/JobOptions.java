@@ -159,6 +159,13 @@ public class JobOptions {
             case "6":
             case "notch":
                 return Material.ENCHANTED_GOLDEN_APPLE;
+            // 7 SKIPPED (EXP)
+            case "8":
+            case "netherstar":
+                return Material.NETHER_STAR;
+            case "9":
+            case "ghasttear":
+                return Material.GHAST_TEAR;
             default:
                 return Material.DEAD_BRAIN_CORAL_FAN;
         }
