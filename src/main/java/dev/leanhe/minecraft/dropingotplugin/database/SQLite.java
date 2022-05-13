@@ -36,10 +36,14 @@ public class SQLite extends Database {
 
     // SQL creation stuff, You can leave the blow stuff untouched.
     public Connection getSQLConnection() {
-        File dataFolder = new File(plugin.getDataFolder(), dbname + ".db");
+        File dataFolder = plugin.getDataFolder();
         if (!dataFolder.exists()) {
+            dataFolder.mkdir();
+        }
+        File database = new File(plugin.getDataFolder(), dbname + ".db");
+        if (!database.exists()) {
             try {
-                dataFolder.createNewFile();
+                database.createNewFile();
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "File write error: " + dbname + ".db");
             }
@@ -49,7 +53,7 @@ public class SQLite extends Database {
                 return connection;
             }
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:" + dataFolder);
+            connection = DriverManager.getConnection("jdbc:sqlite:" + database);
             return connection;
         } catch (SQLException ex) {
             plugin.getLogger().log(Level.SEVERE, "SQLite exception on initialize", ex);
@@ -83,7 +87,7 @@ public class SQLite extends Database {
         }
     }
 
-    public final static String TRUNCATE_STATEMENT = "TRUNCATE TABLE joblist";
+    public final static String TRUNCATE_STATEMENT = "DELETE FROM job_list";
     /*public final static String INSERT_STATEMENT = """
         INSERT INTO "job_list" 
         ("world", "x", "y", "z", "type", "amount", "interval", "job_id") VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -94,6 +98,10 @@ public class SQLite extends Database {
     public final static String SELECT_STATEMENT = "SELECT * FROM job_list";
     public final static String DELETE_STATEMENT = "DELETE FROM job_list WHERE id = ?";
 
+
+    /*public World getWorldByUUID(String worldUUID) {
+        return plugin.getServer().getWorld(worldUUID);
+    }*/
 
     public World getWorldByName(String worldName) {
         return plugin.getServer().getWorld(worldName);
@@ -121,21 +129,21 @@ public class SQLite extends Database {
 
     /*public JobOptions updateJob()*/
 
-    public void insertJob(JobOptions job, int job_id) {
+    public void insertJob(JobOptions job, int jobID) {
         try (PreparedStatement statement = connection.prepareStatement(INSERT_STATEMENT)) {
-            statement.setInt(1, job_id);
+            statement.setInt(1, jobID);
             job.fillStatement(statement).execute();
-            connection.commit();
+            //connection.commit();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Got exception while insert jobs", e);
         }
     }
 
-    public void removeJob(int job_id) {
+    public void removeJob(int jobID) {
         try (PreparedStatement statement = connection.prepareStatement(DELETE_STATEMENT)) {
-            statement.setInt(1, job_id);
+            statement.setInt(1, jobID);
             statement.execute();
-            connection.commit();
+            //connection.commit();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Got exception while insert jobs", e);
         }
@@ -143,8 +151,8 @@ public class SQLite extends Database {
 
     public void cleanJob() {
         try (PreparedStatement statement = connection.prepareStatement(TRUNCATE_STATEMENT)) {
-            statement.executeQuery();
-            connection.commit();
+            statement.execute();
+            //connection.commit();
         } catch (SQLException e) {
             plugin.getLogger().log(Level.SEVERE, "Got exception while clean jobs", e);
         }

@@ -1,8 +1,9 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 
-import dev.leanhe.minecraft.dropingotplugin.database.SQLite;
-import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
+import dev.leanhe.minecraft.dropingotplugin.exceptions.CommandFormatErrorException;
+import dev.leanhe.minecraft.dropingotplugin.exceptions.ConsoleUsePlaceHolderException;
+import dev.leanhe.minecraft.dropingotplugin.exceptions.DropIngotPluginException;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -46,11 +47,11 @@ public class JobOptions {
     }
 
     public JobOptions(ResultSet resultSet, World world) throws SQLException {
-        this(resultSet.getString(6), resultSet.getInt(8), resultSet.getInt(7), new Location(world, resultSet.getDouble(3), resultSet.getDouble(4), resultSet.getDouble(5)), world);
+        this(resultSet.getString(6), resultSet.getInt(7), resultSet.getInt(8), new Location(world, resultSet.getDouble(3), resultSet.getDouble(4), resultSet.getDouble(5)), world);
     }
 
     public PreparedStatement fillStatement(PreparedStatement statement) throws SQLException {
-        statement.setString(2, this.location.toString());
+        statement.setString(2, Objects.requireNonNull(this.location.getWorld()).getName());
         statement.setDouble(3, this.location.getX());
         statement.setDouble(4, this.location.getY());
         statement.setDouble(5, this.location.getZ());
@@ -158,9 +159,6 @@ public class JobOptions {
         this.spawn(location);
     }
 
-    void spawn_with_condition() {
-    }
-
     Material getMaterial() {
         switch (this.type) {
             case "1":
@@ -212,6 +210,18 @@ public class JobOptions {
                 ", amount=" + amount +
                 ", type='" + type + '\'' +
                 '}';
+    }
+
+    public String prettyString() {
+        String type = this.type;
+        try {
+            int i = Integer.parseInt(type);
+            type = DropIngotPlugin.materials[i - 1];
+        } catch (NumberFormatException ignore) {
+        }
+        return "DropJob: %s x %d %s(%d, %d, %d) %ds".formatted(
+                type, this.amount, Objects.requireNonNull(this.location.getWorld()).getName(), (int) this.location.getX(), (int) this.location.getY(), (int) this.location.getZ(), this.interval
+        );
     }
 
     static ArrayList<Integer> getJobs() {

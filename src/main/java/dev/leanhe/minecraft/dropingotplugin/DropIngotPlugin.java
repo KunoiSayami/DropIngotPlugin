@@ -1,17 +1,17 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 import dev.leanhe.minecraft.dropingotplugin.database.SQLite;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.*;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 
 
 class StopCommandExecutor implements CommandExecutor {
@@ -41,6 +41,7 @@ class StopCommandExecutor implements CommandExecutor {
             if (JobOptions.queryJobs(jobID)) {
                 JobOptions.cancelJob(sender.getServer(), jobID);
                 sender.sendMessage("Stopped job " + args[0]);
+                this.dropIngotPlugin.removeJob(jobID);
             } else {
                 sender.sendMessage("JobID incorrect, please check your input");
                 return false;
@@ -58,7 +59,7 @@ public final class DropIngotPlugin extends JavaPlugin {
 
     private SQLite sqliteInstance;
 
-    private static final String[] materials = new String[]{"iron", "gold", "diamond", "netherite", "emerald", "notch", "exp", "netherstar", "ghasttear"};
+    static final String[] materials = new String[]{"iron", "gold", "diamond", "netherite", "emerald", "notch", "exp", "netherstar", "ghasttear"};
 
 
     public static Location getSenderLocation(CommandSender sender) {
@@ -181,14 +182,15 @@ public final class DropIngotPlugin extends JavaPlugin {
         sqliteInstance.cleanJob();
         for (JobOptions job : jobs) {
             if (!job.isMaterialVaild()) {
-                getLogger().log(Level.WARNING, "Skipped not vaild job => " + job);
+                Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[DropIngot] Skipped not vaild job => " + job);
                 continue;
             }
             BukkitTask task = this.getServer().getScheduler().runTaskTimer(this, () -> ItemCommandExecutor.staff(this.getServer(), job), 0, job.getInterval());
             JobOptions.insertJobs(task.getTaskId());
             sqliteInstance.insertJob(job, task.getTaskId());
+            Bukkit.getConsoleSender().sendMessage("%s[DropIngot] Created job(%d): %s%s".formatted(ChatColor.GREEN, task.getTaskId(), job.prettyString(), ChatColor.WHITE));
         }
-        getLogger().info("Load " + jobs.size() + " job(s)");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[DropIngot] Load " + jobs.size() + " job(s)");
     }
 
     @Override
@@ -201,8 +203,12 @@ public final class DropIngotPlugin extends JavaPlugin {
         sqliteInstance.cleanJob();
     }
 
-    void insertJob(JobOptions job, int job_id) {
-        sqliteInstance.insertJob(job, job_id);
+    void insertJob(JobOptions job, int jobID) {
+        sqliteInstance.insertJob(job, jobID);
+    }
+
+    void removeJob(Integer jobID) {
+        sqliteInstance.removeJob(jobID);
     }
 }
 

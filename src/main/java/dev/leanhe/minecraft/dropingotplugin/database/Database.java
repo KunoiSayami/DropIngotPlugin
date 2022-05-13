@@ -4,10 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 import dev.leanhe.minecraft.dropingotplugin.DropIngotPlugin;
-import org.bukkit.entity.Player;
 
 public abstract class Database {
     DropIngotPlugin plugin;
