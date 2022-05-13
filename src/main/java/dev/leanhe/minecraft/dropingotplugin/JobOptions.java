@@ -1,6 +1,7 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
 
+import dev.leanhe.minecraft.dropingotplugin.database.SQLite;
 import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -11,6 +12,9 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -38,8 +42,24 @@ public class JobOptions {
     }
 
     public JobOptions(String type, int amount, int interval, Location location, World world) {
-        this(type, amount, interval, -1 ,-1 ,-1, location, world);
+        this(type, amount, interval, -1, -1, -1, location, world);
     }
+
+    public JobOptions(ResultSet resultSet, World world) throws SQLException {
+        this(resultSet.getString(6), resultSet.getInt(8), resultSet.getInt(7), new Location(world, resultSet.getDouble(3), resultSet.getDouble(4), resultSet.getDouble(5)), world);
+    }
+
+    public PreparedStatement fillStatement(PreparedStatement statement) throws SQLException {
+        statement.setString(2, this.location.toString());
+        statement.setDouble(3, this.location.getX());
+        statement.setDouble(4, this.location.getY());
+        statement.setDouble(5, this.location.getZ());
+        statement.setString(6, this.type);
+        statement.setInt(7, this.amount);
+        statement.setInt(8, this.interval);
+        return statement;
+    }
+
 
     public Location getLocation() {
         return this.location;
@@ -97,13 +117,13 @@ public class JobOptions {
                 return new JobOptions(args[0], Integer.parseInt(args[1]), Integer.parseInt(args[2]), location, world);
             case 6:
                 if (location == null) {
-                    for (int i = 3; i < 6; i++ ) {
+                    for (int i = 3; i < 6; i++) {
                         if (args[i].startsWith("~")) {
                             throw new ConsoleUsePlaceHolderException();
                         }
                     }
                 } else {
-                    for (int i = 3; i < 6; i++ ) {
+                    for (int i = 3; i < 6; i++) {
                         args[i] = replaceLocationPlaceHolder(args[i], location, i - 3);
                     }
                 }
@@ -136,6 +156,9 @@ public class JobOptions {
             location = this.getLocation(this.world);
         }
         this.spawn(location);
+    }
+
+    void spawn_with_condition() {
     }
 
     Material getMaterial() {
@@ -210,7 +233,7 @@ public class JobOptions {
     }
 
     static void clearJobs(Server server) {
-        for (Integer i: JobOptions.jobs) {
+        for (Integer i : JobOptions.jobs) {
             server.getScheduler().cancelTask(i);
         }
         JobOptions.jobs.clear();
@@ -228,4 +251,5 @@ public class JobOptions {
     public World getWorld() {
         return this.world;
     }
+
 }

@@ -1,7 +1,9 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
+import com.google.common.util.concurrent.AbstractScheduledService;
 import dev.leanhe.minecraft.dropingotplugin.exceptions.*;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -48,27 +50,11 @@ public class ItemCommandExecutor implements CommandExecutor {
             }
             sender.getServer().getLogger().info(job.toString());
 
-            BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> {
-                if (sender.getServer().getOnlinePlayers().stream().anyMatch(player -> {
-
-                    Location loc = player.getLocation();
-                    if (!Objects.equals(loc.getWorld(), job.getWorld())) {
-                        return false;
-                    }
-
-                    double distance = ItemCommandExecutor.calcDistance(loc, job.getLocation());
-
-                    //Bukkit.getLogger().info("Distance => " + distance);
-
-                    return distance <= 64;
-                }))
-                {
-                    job.spawn();
-                }
-            }, 0, job.getInterval());
+            BukkitTask task = sender.getServer().getScheduler().runTaskTimer(this.dropIngotPlugin, () -> staff(sender.getServer(), job), 0, job.getInterval());
 
             sender.sendMessage("Job created, your job id is " + task.getTaskId());
             JobOptions.insertJobs(task.getTaskId());
+            this.dropIngotPlugin.insertJob(job, task.getTaskId());
 
         } catch (CommandFormatErrorException ignored) {
             return false;
@@ -82,7 +68,23 @@ public class ItemCommandExecutor implements CommandExecutor {
 
         }
 
-
         return true;
+    }
+
+    public static void staff(Server server, JobOptions job) {
+        if (server.getOnlinePlayers().stream().anyMatch(player -> {
+
+            Location loc = player.getLocation();
+            if (!Objects.equals(loc.getWorld(), job.getWorld())) {
+                return false;
+            }
+
+            double distance = ItemCommandExecutor.calcDistance(loc, job.getLocation());
+
+
+            return distance <= 64;
+        })) {
+            job.spawn();
+        }
     }
 }

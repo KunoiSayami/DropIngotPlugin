@@ -1,14 +1,17 @@
 package dev.leanhe.minecraft.dropingotplugin;
 
+import dev.leanhe.minecraft.dropingotplugin.database.SQLite;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 
 class StopCommandExecutor implements CommandExecutor {
@@ -28,6 +31,7 @@ class StopCommandExecutor implements CommandExecutor {
 
         if (args.length == 0) {
             sender.getServer().getScheduler().cancelTasks(this.dropIngotPlugin);
+            this.dropIngotPlugin.clearJobs();
             sender.sendMessage("Stopped all jobs");
             return true;
         }
@@ -49,30 +53,10 @@ class StopCommandExecutor implements CommandExecutor {
     }
 }
 
-// TODO: Use configure file to store jobs
-class ConfigWrapper {
-
-    public final int VERSION = 1;
-
-    FileConfiguration config;
-
-    ConfigWrapper(FileConfiguration config) {
-        this.config = config;
-        this.config.addDefault("VERSION", VERSION);
-        this.config.addDefault("jobs", new ArrayList<JobOptions>());
-        config.options().copyDefaults(true);
-    }
-
-    ConfigWrapper write_jobs() {
-        ArrayList<JobOptions> jobs = (ArrayList<JobOptions>) this.config.getList("jobs");
-        return this;
-    }
-
-}
 
 public final class DropIngotPlugin extends JavaPlugin {
 
-    ConfigWrapper config = new ConfigWrapper(getConfig());
+    private SQLite sqliteInstance;
 
     private static final String[] materials = new String[]{"iron", "gold", "diamond", "netherite", "emerald", "notch", "exp", "netherstar", "ghasttear"};
 
@@ -136,7 +120,7 @@ public final class DropIngotPlugin extends JavaPlugin {
             return List.of(materials);
         }
         ArrayList<String> list = new ArrayList<>();
-        for (String material: materials) {
+        for (String material : materials) {
             if (material.startsWith(arg)) {
                 list.add(material);
             }
@@ -181,7 +165,6 @@ public final class DropIngotPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        getLogger().info("Enabled");
         PluginCommand command = this.getCommand("airdrop");
         if (command != null) {
             command.setExecutor(new ItemCommandExecutor(this));
@@ -193,14 +176,33 @@ public final class DropIngotPlugin extends JavaPlugin {
             command.setTabCompleter(this);
         }
         JobOptions.getJobs();
-
-        //getServer().getPluginManager().registerEvents(this, this);
+        sqliteInstance = new SQLite(this).load();
+        ArrayList<JobOptions> jobs = sqliteInstance.getJobs();
+        sqliteInstance.cleanJob();
+        for (JobOptions job : jobs) {
+            if (!job.isMaterialVaild()) {
+                getLogger().log(Level.WARNING, "Skipped not vaild job => " + job);
+                continue;
+            }
+            BukkitTask task = this.getServer().getScheduler().runTaskTimer(this, () -> ItemCommandExecutor.staff(this.getServer(), job), 0, job.getInterval());
+            JobOptions.insertJobs(task.getTaskId());
+            sqliteInstance.insertJob(job, task.getTaskId());
+        }
+        getLogger().info("Load " + jobs.size() + " job(s)");
     }
 
     @Override
     public void onDisable() {
         JobOptions.clearJobs(getServer(), getPlugin(getClass()));
         getLogger().info("Disabled");
+    }
+
+    void clearJobs() {
+        sqliteInstance.cleanJob();
+    }
+
+    void insertJob(JobOptions job, int job_id) {
+        sqliteInstance.insertJob(job, job_id);
     }
 }
 
